@@ -12,7 +12,10 @@ pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName, N: Dim + DimName + 
     where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> {
     let theta : T = convert(0.95);
     let one: T = convert(1.0);
+    let gamma: T = convert(0.9);
+
     let A_tranpose = A.transpose();
+    let mut gamma_mu = OVector::<T,N>::from_element(one);
     let mut x = OVector::<T,N>::from_element(one);
     let mut s = OVector::<T,N>::from_element(one);
     let mut y = OVector::<T,M>::zeros();
@@ -30,8 +33,12 @@ pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName, N: Dim + DimName + 
         for i in 0..N::USIZE {
             S_inv[(i,i)] = one/s[i];
             X[(i,i)] = x[i];
+            gamma_mu[i] = gamma*mu;
         }
         let M = A*(&S_inv)*(&X)*(&A_tranpose);
+        let r = b + A*(&S_inv)*((&X)*(&r_dual) - (&gamma_mu));
+
+        
 
        
 
