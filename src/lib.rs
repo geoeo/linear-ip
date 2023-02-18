@@ -8,7 +8,7 @@ use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAlloca
  * Returns (x (primal), y (dual))
  */
 #[allow(non_snake_case)]
-pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
+pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output = M>, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
     where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> {
     let theta : T = convert(0.95);
     let one: T = convert(1.0);
@@ -37,8 +37,7 @@ pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName, N: Dim + DimName + 
         }
         let M = A*(&S_inv)*(&X)*(&A_tranpose);
         let r = b + A*(&S_inv)*((&X)*(&r_dual) - (&gamma_mu));
-
-        
+        let d_y = M.qr().solve(&r);
 
        
 
