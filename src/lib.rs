@@ -11,8 +11,9 @@ use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAlloca
 pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output = M>, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
     where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> {
     let theta : T = convert(0.95);
-    let one: T = convert(1.0);
     let gamma: T = convert(0.9);
+    
+    let one: T = convert(1.0);
     let max_val = T::max_value().unwrap();
 
     let A_transpose = A.transpose();
