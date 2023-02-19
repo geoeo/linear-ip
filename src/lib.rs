@@ -1,6 +1,6 @@
 extern crate nalgebra as na;
 
-use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAllocator, allocator::Allocator, convert, RealField, DimMin};
+use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAllocator, allocator::Allocator, convert, RealField, DimMin, DimSub, Const};
 
 
 /**
@@ -8,13 +8,14 @@ use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAlloca
  * Returns (x (primal), y (dual))
  */
 #[allow(non_snake_case)]
-pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output = M>, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
-    where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> {
+pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output = M> +  DimSub<Const<1>>, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
+    where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
     let theta : T = convert(0.95);
     let gamma: T = convert(0.9);
     
     let one: T = convert(1.0);
     let max_val = T::max_value().unwrap();
+    let svd_eps: T = convert(1e-20);
 
     let A_transpose = A.transpose();
     let mut gamma_mu = OVector::<T,N>::from_element(one);
@@ -39,7 +40,7 @@ pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output =
         }
         let M = A*(&S_inv)*(&X)*(&A_transpose);
         let r = b + A*(&S_inv)*((&X)*(&r_dual) - (&gamma_mu));
-        let d_y = M.qr().solve(&r).expect("direction y failed");
+        let d_y = M.svd(true,true).solve(&r, svd_eps).expect("direction y failed");
         let d_s = (&r_dual) - (&A_transpose)*(&d_y);
         let d_x = -(&x) + (&S_inv)*((&gamma_mu)-(&X)*(&d_s));
 
