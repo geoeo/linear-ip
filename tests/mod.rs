@@ -15,7 +15,7 @@ fn simple_f64(){
     let c = Vector1::<f64>::new(3.0);
     let eps: f64 = 1e-10;
     let theta : f64 = 0.95;
-    let gamma : f64 = 0.1;
+    let gamma : f64 = 0.05;
     let max_it = 10;
 
     let (_,y) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
@@ -35,7 +35,7 @@ fn simple_f32(){
     let c = Vector1::<f32>::new(3.0);
     let eps: f32 = 1e-10;
     let theta : f32 = 0.95;
-    let gamma : f32 = 0.1;
+    let gamma : f32 = 0.05;
     let max_it = 10;
 
     let (_,y) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
