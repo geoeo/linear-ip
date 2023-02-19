@@ -8,11 +8,12 @@ use na::{OMatrix,OVector, Scalar, Dim, DimName, default_allocator::DefaultAlloca
  * Returns (x (primal), y (dual))
  */
 #[allow(non_snake_case)]
-pub fn solve<T: Scalar + RealField + Copy, M: Dim + DimName + DimMin<M, Output = M> +  DimSub<Const<1>>, N: Dim + DimName + DimMin<N, Output = N>>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
-    where  DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
-    let theta : T = convert(0.95);
-    let gamma: T = convert(0.9);
-    
+pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>) 
+    where 
+        T: Scalar + RealField + Copy, 
+        M: Dim + DimName + DimMin<M, Output = M> + DimSub<Const<1>>, 
+        N: Dim + DimName + DimMin<N, Output = N>,
+        DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
     let one: T = convert(1.0);
     let max_val = T::max_value().unwrap();
     let svd_eps: T = convert(1e-20);

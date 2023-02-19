@@ -13,10 +13,12 @@ fn simple_f64(){
     let a = Vector2::<f64>::new(1.0,1.0);
     let b = Vector2::<f64>::new(2.0,2.0);
     let c = Vector1::<f64>::new(3.0);
-    let eps: f64 = 1e-5;
-    let max_it = 100;
+    let eps: f64 = 1e-10;
+    let theta : f64 = 0.95;
+    let gamma : f64 = 0.1;
+    let max_it = 10;
 
-    let (_,y) = linear_ip::solve(&a, &b, &c, eps, max_it);
+    let (_,y) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f64, epsilon  = eps);
@@ -31,10 +33,12 @@ fn simple_f32(){
     let a = Vector2::<f32>::new(1.0,1.0);
     let b = Vector2::<f32>::new(2.0,2.0);
     let c = Vector1::<f32>::new(3.0);
-    let eps: f32 = 1e-5;
-    let max_it = 100;
+    let eps: f32 = 1e-10;
+    let theta : f32 = 0.95;
+    let gamma : f32 = 0.1;
+    let max_it = 10;
 
-    let (_,y) = linear_ip::solve(&a, &b, &c, eps, max_it);
+    let (_,y) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f32, epsilon  = eps);
