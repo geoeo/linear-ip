@@ -11,4 +11,4 @@ license = "BSD-3-Clause"
 nalgebra = {version="0.32.2", features=["rand-no-std"]}
 
 [dev-dependencies]
-approx = {version = "*"}
+approx = {version = "0.5.1"}
