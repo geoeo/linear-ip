@@ -8,7 +8,7 @@ license = "BSD-3-Clause"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nalgebra = {version="0.32.2", features=["rand-no-std"]}
+nalgebra = {version="*", features=["rand-no-std"]}
 
 [dev-dependencies]
-approx = {version = "0.5.1"}
+approx = {version = "*"}
