@@ -3,7 +3,7 @@ name = "linear-ip"
 version = "0.1.0"
 edition = "2021"
 description = "Linear Primal Dual Solver Using the the Interior Point Method"
-license = "MIT"
+license = "BSD-3-Clause"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
