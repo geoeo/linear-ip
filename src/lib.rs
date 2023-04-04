@@ -20,16 +20,18 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
     let A_transpose = A.transpose();
     let n = A.ncols();
     let m = A.nrows();
+    let dim_n = Dim::from_usize(n);
+    let dim_m = Dim::from_usize(m);
 
-    let mut gamma_mu = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(Dim::from_usize(n), Const::<1>,one);
-    let mut x = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(Dim::from_usize(n), Const::<1>,one);
-    let mut s = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(Dim::from_usize(n), Const::<1>,one);
-    let mut y = Vector::<T,M, Owned<T,M,Const<1>>>::zeros_generic(Dim::from_usize(m), Const::<1>);
+    let mut gamma_mu = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(dim_n, Const::<1>,one);
+    let mut x = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(dim_n, Const::<1>,one);
+    let mut s = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(dim_n, Const::<1>,one);
+    let mut y = Vector::<T,M, Owned<T,M,Const<1>>>::zeros_generic(dim_m, Const::<1>);
     let mut r_primal =  Vector::<T,M, Owned<T,M,Const<1>>>::from_element_generic(Dim::from_usize(m), Const::<1>,max_val);
-    let mut r_dual = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(Dim::from_usize(n), Const::<1>,max_val);
+    let mut r_dual = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(dim_n, Const::<1>,max_val);
     let mut k = 0;
-    let mut S_inv = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(Dim::from_usize(n), Dim::from_usize(n));
-    let mut X = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(Dim::from_usize(n), Dim::from_usize(n));
+    let mut S_inv = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n);
+    let mut X = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n);
     let n_f64 : T = convert(n as f64);
 
     while k < max_it && (r_primal.norm() > eps || r_dual.norm() > eps || x.dot(&s) > eps) {
