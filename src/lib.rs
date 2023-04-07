@@ -1,14 +1,14 @@
 extern crate nalgebra as na;
 
 use na::{OMatrix, OVector, Vector, Matrix, Scalar, Dim, default_allocator::DefaultAllocator, allocator::Allocator, convert, RealField, DimMin, DimSub, Const, storage::Owned, SimdValue};
-
+use nalgebra_sparse::{coo::CooMatrix, csr::CsrMatrix};
 
 /**
  * A is Dim(MxN), x,c,s are Dim(N), y,b are Dim(M)
  * Returns (x (primal), y (dual))
  */
 #[allow(non_snake_case)]
-pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>, usize, T, T) 
+pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize, svd_eps: T) -> (OVector<T, N>,OVector<T,M>, usize, T, T) 
     where 
         T: Scalar + RealField + Copy + SimdValue, 
         M: Dim + DimMin<M, Output = M> + DimSub<Const<1>>, 
@@ -16,7 +16,6 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
         DefaultAllocator: Allocator<T, Const<1>, N> + Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
     let one: T = convert(1.0);
     let max_val = T::max_value().unwrap();
-    let svd_eps: T = convert(1e-8);
     let A_transpose = A.transpose();
     let n = A.ncols();
     let m = A.nrows();
@@ -30,8 +29,9 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
     let mut r_primal =  Vector::<T,M, Owned<T,M,Const<1>>>::from_element_generic(Dim::from_usize(m), Const::<1>,max_val);
     let mut r_dual = Vector::<T,N, Owned<T,N,Const<1>>>::from_element_generic(dim_n, Const::<1>,max_val);
     let mut k = 0;
-    let mut S_inv = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n);
-    let mut X = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n);
+    let mut S_inv = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n); // Diagonal
+    //let mut S_inv_coo = CooMatrix::<T>::new(n, n);
+    let mut X = Matrix::<T,N,N,Owned<T,N,N>>::zeros_generic(dim_n, dim_n); // Digonal
     let n_f64 : T = convert(n as f64);
 
     while k < max_it && (r_primal.norm() > eps || r_dual.norm() > eps || x.dot(&s) > eps) {
@@ -40,10 +40,13 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
         let mu = x.dot(&s)/n_f64;
         for i in 0..n {
             S_inv[(i,i)] = one/s[i];
+            //S_inv_coo.push(i,i,one/s[i]);
             X[(i,i)] = x[i];
             gamma_mu[i] = gamma*mu;
         }
+        //let S_inv_csr = CsrMatrix::from(&S_inv_coo);
 
+        //let A_S_inv=  A*S_inv_csr; 
         let A_S_inv =  A*(&S_inv); 
         let M = &A_S_inv*(&X)*(&A_transpose); // Performance Offender
         let r = b + &A_S_inv*((&X)*(&r_dual) - (&gamma_mu)); // Performance Offender

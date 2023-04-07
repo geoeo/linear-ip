@@ -9,6 +9,7 @@ license = "BSD-3-Clause"
 
 [dependencies]
 nalgebra = {version="*", features=["rand-no-std"]}
+nalgebra-sparse = "*"
 
 [dev-dependencies]
 approx = {version = "*"}

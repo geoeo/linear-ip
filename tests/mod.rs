@@ -18,7 +18,7 @@ fn simple_f64(){
     let gamma : f64 = 0.1;
     let max_it = 10;
 
-    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
+    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f64, epsilon  = eps);
@@ -38,7 +38,7 @@ fn simple_f64_dyn(){
     let gamma : f64 = 0.1;
     let max_it = 10;
 
-    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
+    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f64, epsilon  = eps);
@@ -58,7 +58,7 @@ fn simple_f32(){
     let gamma : f32 = 0.1;
     let max_it = 10;
 
-    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
+    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f32, epsilon  = eps);
@@ -78,7 +78,7 @@ fn simple_f32_dyn(){
     let gamma : f32 = 0.1;
     let max_it = 10;
 
-    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
+    let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
     let y2 = y[1];
     assert_relative_eq!(y1,1.5f32, epsilon  = eps);
