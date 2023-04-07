@@ -12,7 +12,7 @@ fn simple_f64(){
     let gamma : f64 = 0.1;
     let max_it = 10;
 
-    let (_, _, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it);
+    let (_, _, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
