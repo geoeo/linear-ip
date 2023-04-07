@@ -12,3 +12,8 @@ nalgebra = {version="*", features=["rand-no-std"]}
 
 [dev-dependencies]
 approx = {version = "*"}
+criterion = "0.3"
+
+[[bench]]
+name = "my_benchmark"
+harness = false

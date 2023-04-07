@@ -1,6 +1,6 @@
 extern crate nalgebra as na;
 
-use na::{OMatrix, OVector, Vector, Matrix, Scalar, Dim, default_allocator::DefaultAllocator, allocator::Allocator, convert, RealField, DimMin, DimSub, Const, storage::Owned};
+use na::{OMatrix, OVector, Vector, Matrix, Scalar, Dim, default_allocator::DefaultAllocator, allocator::Allocator, convert, RealField, DimMin, DimSub, Const, storage::Owned, SimdValue};
 
 
 /**
@@ -10,13 +10,13 @@ use na::{OMatrix, OVector, Vector, Matrix, Scalar, Dim, default_allocator::Defau
 #[allow(non_snake_case)]
 pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize) -> (OVector<T, N>,OVector<T,M>, usize, T, T) 
     where 
-        T: Scalar + RealField + Copy, 
+        T: Scalar + RealField + Copy + SimdValue, 
         M: Dim + DimMin<M, Output = M> + DimSub<Const<1>>, 
         N: Dim + DimMin<N, Output = N>,
-        DefaultAllocator: Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
+        DefaultAllocator: Allocator<T, Const<1>, N> + Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output>  {
     let one: T = convert(1.0);
     let max_val = T::max_value().unwrap();
-    let svd_eps: T = convert(1e-20);
+    let svd_eps: T = convert(1e-8);
     let A_transpose = A.transpose();
     let n = A.ncols();
     let m = A.nrows();
@@ -43,9 +43,11 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
             X[(i,i)] = x[i];
             gamma_mu[i] = gamma*mu;
         }
-        let M = A*(&S_inv)*(&X)*(&A_transpose);
-        let r = b + A*(&S_inv)*((&X)*(&r_dual) - (&gamma_mu));
-        let d_y = M.svd(true,true).solve(&r, svd_eps).expect("direction y failed");
+
+        let A_S_inv =  A*(&S_inv); 
+        let M = &A_S_inv*(&X)*(&A_transpose); // Performance Offender
+        let r = b + &A_S_inv*((&X)*(&r_dual) - (&gamma_mu)); // Performance Offender
+        let d_y = M.svd_unordered(true,true).solve(&r, svd_eps).expect("direction y failed"); // Performance Offender !!
         let d_s = (&r_dual) - (&A_transpose)*(&d_y);
         let d_x = -(&x) + (&S_inv)*((&gamma_mu)-(&X)*(&d_s));
 
