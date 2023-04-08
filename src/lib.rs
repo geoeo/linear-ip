@@ -8,7 +8,7 @@ use na::{OMatrix, OVector, Vector, Matrix, Scalar, Dim, default_allocator::Defau
  * Returns (x (primal), y (dual))
  */
 #[allow(non_snake_case)]
-pub fn solve<'a, T, M, N>(A: &'a OMatrix<T,M,N>, b: &'a OVector<T,M>, c: &'a OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize, svd_eps: T) -> (OVector<T, N>,OVector<T,M>, usize, T, T) 
+pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, eps: T, theta: T, gamma: T, max_it: usize, svd_eps: T) -> (OVector<T, N>,OVector<T,M>, usize, T, T) 
     where 
         T: Scalar + RealField + Copy + SimdValue, 
         M: Dim + DimMin<M, Output = M> + DimSub<Const<1>>, 
