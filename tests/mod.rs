@@ -14,10 +14,9 @@ fn simple_f64(){
     let b = Vector2::<f64>::new(2.0,2.0);
     let c = Vector1::<f64>::new(3.0);
     let eps: f64 = 1e-10;
-    let theta : f64 = 0.95;
-    let gamma : f64 = 0.1;
-    let max_it = 10;
-
+    let theta : f64 = 0.25;
+    let gamma : f64 = 0.5;
+    let max_it = 100;
     let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
     let y2 = y[1];
@@ -34,9 +33,9 @@ fn simple_f64_dyn(){
     let b = DVector::<f64>::from_vec(vec![2.0,2.0]);
     let c = DVector::<f64>::from_vec(vec![3.0]);
     let eps: f64 = 1e-10;
-    let theta : f64 = 0.95;
-    let gamma : f64 = 0.1;
-    let max_it = 10;
+    let theta : f64 = 0.25;
+    let gamma : f64 = 0.5;
+    let max_it = 100;
 
     let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
@@ -54,9 +53,9 @@ fn simple_f32(){
     let b = Vector2::<f32>::new(2.0,2.0);
     let c = Vector1::<f32>::new(3.0);
     let eps: f32 = 1e-10;
-    let theta : f32 = 0.95;
-    let gamma : f32 = 0.1;
-    let max_it = 10;
+    let theta : f32 = 0.25;
+    let gamma : f32 = 0.5;
+    let max_it = 100;
 
     let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
@@ -74,9 +73,9 @@ fn simple_f32_dyn(){
     let b = DVector::<f32>::from_vec(vec![2.0,2.0]);
     let c = DVector::<f32>::from_vec(vec![3.0]);
     let eps: f32 = 1e-10;
-    let theta : f32 = 0.95;
-    let gamma : f32 = 0.1;
-    let max_it = 10;
+    let theta : f32 = 0.25;
+    let gamma : f32 = 0.5;
+    let max_it = 100;
 
     let (_, y, _, _, _) = linear_ip::solve(&a, &b, &c, eps, theta, gamma, max_it, 1e-20);
     let y1 = y[0];
