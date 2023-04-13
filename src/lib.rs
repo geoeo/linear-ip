@@ -15,7 +15,7 @@ pub fn solve<T, M, N>(A: &OMatrix<T,M,N>, b: &OVector<T,M>, c: &OVector<T,N>, ep
         N: Dim + DimMin<N, Output = N>,
         DefaultAllocator: Allocator<T, Const<1>, N> + Allocator<T, M> + Allocator<T, M, N> + Allocator<T, N, M> + Allocator<T, N, N> + Allocator<T, N> + Allocator<T, M, M> + Allocator<(T, usize), M> 
         + Allocator<(usize, usize), M> + Allocator<T, <M as DimSub<Const<1>>>::Output> {
-    let one: T = convert(1.0);
+    let one: T = T::one();
     let max_val = T::max_value().unwrap();
     let A_transpose = A.transpose();
     let n = A.ncols();
