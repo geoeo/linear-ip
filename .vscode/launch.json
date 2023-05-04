@@ -8,7 +8,7 @@
             "name": "Test",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/deps/mod-fc657db66c1c9eae",
+            "program": "${workspaceFolder}/target/debug/deps/mod-781a7512d292aeba",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

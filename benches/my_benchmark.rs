@@ -1,12 +1,13 @@
 extern crate nalgebra as na;
 use criterion::{criterion_group, criterion_main, Criterion};
-use na::{Vector2,Vector1};
+use na::{DMatrix,DVector};
 use linear_ip;
 
 fn simple_f64(){
-    let a = Vector2::<f64>::new(1.0,1.0);
-    let b = Vector2::<f64>::new(2.0,2.0);
-    let c = Vector1::<f64>::new(3.0);
+    let a = DMatrix::<f64>::from_vec(2,1,vec![1.0,1.0]);
+    let b = DVector::<f64>::from_vec(vec![2.0,2.0]);
+    let c = DVector::<f64>::from_vec(vec![3.0]);
+
     let eps: f64 = 1e-10;
     let theta : f64 = 0.95;
     let gamma : f64 = 0.1;
