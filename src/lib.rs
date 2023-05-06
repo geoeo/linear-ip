@@ -14,7 +14,6 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
     let one = T::one();
     let zero = T::zero();
     let max_val = T::max_value().unwrap();
-    let A_transpose = A.transpose();
     let n = A.ncols();
     let m = A.nrows();
 
@@ -76,7 +75,7 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
         let M_sp = (&A_S_inv_sp*(&X_sp))*(&A_transpose_sp); // Performance Offender
         let r_sp = b + &A_S_inv_sp*((&X_sp)*(&r_dual_sp) - (&gamma_mu));
 
-        let mut M_sp_d = DMatrix::<T>::zeros(M_sp.nrows(), M_sp.ncols());
+        let mut M_sp_d = DMatrix::<T>::zeros(m, m);
         for (i,j,v) in M_sp.triplet_iter() {
             M_sp_d[(i,j)] = *v;
         }
