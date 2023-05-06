@@ -60,25 +60,26 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
 
     let n_f64 : T = convert(n as f64);
 
-    while k < max_it && (r_primal.norm() > eps || r_dual.norm() > eps || x.dot(&s) > eps) {
+    while k < max_it && (r_primal_sp.norm() > eps || r_dual_sp.norm() > eps || x_sp.dot(&s_sp) > eps) {
         r_primal = b - A*(&x);
         r_dual = c - (&A_transpose)*(&y) - (&s);
 
-        r_primal_sp = b - &A_sp*(&x);
-        r_dual_sp = c - (&A_transpose_sp)*(&y) - (&s);
+        r_primal_sp = b - &A_sp*(&x_sp);
+        r_dual_sp = c - (&A_transpose_sp)*(&y_sp) - (&s_sp);
 
         let mu = x.dot(&s)/n_f64;
+
         for i in 0..n {
-            let v_s = one/s[i];
-            S_inv[(i,i)] = v_s;
+            S_inv[(i,i)] = one/s[i];
+            let v_s = one/s_sp[i];
             if v_s != zero {
                 S_inv_coo.push(i,i,one/s[i]);
             }
 
-            let v_x = x[i];
-            X[(i,i)] = v_x;
+            X[(i,i)] = x[i];
+            let v_x = x_sp[i];
             if v_x != zero {
-                X_coo.push(i,i,x[i]);
+                X_coo.push(i,i,v_x);
             }
             gamma_mu[i] = gamma*mu;
         }
@@ -106,7 +107,7 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
 
         let d_y_sp = M_sp_d.svd_unordered(true,true).solve(&r_sp, svd_eps).expect("direction y failed");
         let d_s_sp = (&r_dual_sp) - (&A_transpose_sp)*(&d_y_sp);
-        let d_x_sp = -(&x) + (&S_inv_sp)*((&gamma_mu)-(&X_sp)*(&d_s_sp));
+        let d_x_sp = -(&x_sp) + (&S_inv_sp)*((&gamma_mu)-(&X_sp)*(&d_s_sp));
 
         let mut step_primal = max_val;
         let mut step_dual = max_val;
@@ -132,12 +133,12 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
             }
 
             if dx_i_sp < T::zero() {
-                let v = -x[i]/dx_i_sp;
+                let v = -x_sp[i]/dx_i_sp;
                   step_primal_sp = step_primal_sp.min(v);
             }
 
             if ds_i_sp < T::zero() {
-                let v = -s[i]/ds_i_sp;
+                let v = -s_sp[i]/ds_i_sp;
                 step_dual_sp = step_dual_sp.min(v);
             }
         }
@@ -156,9 +157,11 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
         y_sp = y_sp+d_y.scale(step_sp);
         s_sp = s_sp+d_s.scale(step_sp);
 
+        S_inv_coo.clear_triplets();
+        X_coo.clear_triplets();
 
         k = k+1;
     }
    
-    (x, y, k, r_primal.norm(), r_dual.norm())
+    (x_sp, y_sp, k, r_primal_sp.norm(), r_dual_sp.norm())
 }
