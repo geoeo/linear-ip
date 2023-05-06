@@ -19,25 +19,15 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
     let m = A.nrows();
 
     let mut gamma_mu = DVector::<T>::from_element(n,one);
-    let mut x = DVector::<T>::from_element(n,one);
-    let mut s = DVector::<T>::from_element(n,one);
-    let mut y = DVector::<T>::zeros(m);
 
     let mut x_sp = DVector::<T>::from_element(n,one);
     let mut s_sp = DVector::<T>::from_element(n,one);
     let mut y_sp = DVector::<T>::zeros(m);
-    
-    let mut r_primal = DVector::<T>::from_element(m,max_val);
-    let mut r_dual = DVector::<T>::from_element(n,max_val);
 
     let mut r_primal_sp = DVector::<T>::from_element(m,max_val);
     let mut r_dual_sp = DVector::<T>::from_element(n,max_val);
 
     let mut k = 0;
-
-    let mut S_inv = DMatrix::<T>::zeros(n, n); // Diagonal
-    let mut X = DMatrix::<T>::zeros(n, n); // Digonal
-
 
     let mut A_transpose_coo = CooMatrix::<T>::new(n, m);
     let mut A_coo = CooMatrix::<T>::new(m, n);
@@ -57,26 +47,21 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
     let mut S_inv_coo = CooMatrix::<T>::new(n, n);
     let mut X_coo = CooMatrix::<T>::new(n, n);
 
-
     let n_f64 : T = convert(n as f64);
 
     while k < max_it && (r_primal_sp.norm() > eps || r_dual_sp.norm() > eps || x_sp.dot(&s_sp) > eps) {
-        r_primal = b - A*(&x);
-        r_dual = c - (&A_transpose)*(&y) - (&s);
 
         r_primal_sp = b - &A_sp*(&x_sp);
         r_dual_sp = c - (&A_transpose_sp)*(&y_sp) - (&s_sp);
 
-        let mu = x.dot(&s)/n_f64;
+        let mu = x_sp.dot(&s_sp)/n_f64;
 
         for i in 0..n {
-            S_inv[(i,i)] = one/s[i];
             let v_s = one/s_sp[i];
             if v_s != zero {
-                S_inv_coo.push(i,i,one/s[i]);
+                S_inv_coo.push(i,i,one/s_sp[i]);
             }
 
-            X[(i,i)] = x[i];
             let v_x = x_sp[i];
             if v_x != zero {
                 X_coo.push(i,i,v_x);
@@ -86,13 +71,9 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
 
         let S_inv_sp = CscMatrix::<T>::from(&S_inv_coo);
         let X_sp = CscMatrix::<T>::from(&X_coo);
-
-        let A_S_inv= A*(&S_inv);
         let A_S_inv_sp = (&A_sp)*(&S_inv_sp);
 
-        let M = (&A_S_inv*(&X))*(&A_transpose); // Performance Offender
         let M_sp = (&A_S_inv_sp*(&X_sp))*(&A_transpose_sp); // Performance Offender
-        let r = b + &A_S_inv*((&X)*(&r_dual) - (&gamma_mu)); // Performance Offender
         let r_sp = b + &A_S_inv_sp*((&X_sp)*(&r_dual_sp) - (&gamma_mu));
 
         let mut M_sp_d = DMatrix::<T>::zeros(M_sp.nrows(), M_sp.ncols());
@@ -100,37 +81,17 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
             M_sp_d[(i,j)] = *v;
         }
 
-
-        let d_y = M.svd_unordered(true,true).solve(&r, svd_eps).expect("direction y failed"); // Performance Offender !!
-        let d_s = (&r_dual) - (&A_transpose)*(&d_y);
-        let d_x = -(&x) + (&S_inv)*((&gamma_mu)-(&X)*(&d_s));
-
         let d_y_sp = M_sp_d.svd_unordered(true,true).solve(&r_sp, svd_eps).expect("direction y failed");
         let d_s_sp = (&r_dual_sp) - (&A_transpose_sp)*(&d_y_sp);
         let d_x_sp = -(&x_sp) + (&S_inv_sp)*((&gamma_mu)-(&X_sp)*(&d_s_sp));
-
-        let mut step_primal = max_val;
-        let mut step_dual = max_val;
 
         let mut step_primal_sp = max_val;
         let mut step_dual_sp = max_val;
 
         for i in 0..n {
-            let dx_i = d_x[i];
-            let ds_i = d_s[i];
 
             let dx_i_sp = d_x_sp[i];
             let ds_i_sp = d_s_sp[i];
-
-            if dx_i < T::zero() {
-                let v = -x[i]/dx_i;
-                step_primal = step_primal.min(v);
-            }
-
-            if ds_i < T::zero() {
-                let v = -s[i]/ds_i;
-                step_dual = step_dual.min(v);
-            }
 
             if dx_i_sp < T::zero() {
                 let v = -x_sp[i]/dx_i_sp;
@@ -143,19 +104,12 @@ pub fn solve<T>(A: &DMatrix<T>, b: &DVector<T>, c: &DVector<T>, eps: T, theta: T
             }
         }
 
-        let step_max = step_primal.min(step_dual);
-        let step = one.min(theta*step_max);
-
-        x = x+d_x.scale(step);
-        y = y+d_y.scale(step);
-        s = s+d_s.scale(step);
-
         let step_max_sp = step_primal_sp.min(step_dual_sp);
         let step_sp = one.min(theta*step_max_sp);
 
-        x_sp = x_sp+d_x.scale(step_sp);
-        y_sp = y_sp+d_y.scale(step_sp);
-        s_sp = s_sp+d_s.scale(step_sp);
+        x_sp = x_sp+d_x_sp.scale(step_sp);
+        y_sp = y_sp+d_y_sp.scale(step_sp);
+        s_sp = s_sp+d_s_sp.scale(step_sp);
 
         S_inv_coo.clear_triplets();
         X_coo.clear_triplets();
